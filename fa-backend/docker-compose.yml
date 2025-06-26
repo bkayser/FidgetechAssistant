@@ -1,0 +1,49 @@
+# Use version '3.8' for modern features and compatibility
+version: '3.8'
+
+services:
+  backend:
+    # Use the name of the Docker image you built for your Node.js backend
+    # Make sure you've built this image first using:
+    # docker build -t fidgetech-backend ./backend
+    image: fidgetech-backend
+
+    # Map port 5000 from the container to port 5000 on your host machine
+    ports:
+      - "5000:5000"
+
+    # Define environment variables to be passed into the container
+    # These override any values specified within the Dockerfile or the server.js itself
+    environment:
+      # These variables are read by your server.js to configure GCP services
+      # Make sure to replace 'your-gcp-project-id', 'us-central1', and 'fidgetech-rag-docs'
+      # with your actual Google Cloud Project ID, desired region, and GCS bucket name.
+      GOOGLE_CLOUD_PROJECT_ID: "your-gcp-project-id"
+      GOOGLE_CLOUD_LOCATION: "us-central1"
+      GCS_BUCKET_NAME: "fidgetech-rag-docs"
+
+      # This environment variable tells Google Cloud client libraries where to find the credentials.
+      # It points to the path *inside the container* where the key file will be mounted.
+      GOOGLE_APPLICATION_CREDENTIALS: "/app/gcp-key.json"
+
+    # Define volumes to mount into the container
+    volumes:
+      # This is a bind mount that maps your local service account JSON key file
+      # directly into the container.
+      #
+      # IMPORTANT:
+      # Replace '/path/to/your/service-account-key.json' with the ACTUAL, full path
+      # to your downloaded service account JSON key file on your host machine.
+      #
+      # The ':ro' at the end means the mounted file will be read-only inside the container,
+      # which is a good security practice.
+      - "/path/to/your/service-account-key.json:/app/gcp-key.json:ro"
+
+    # If you want to rebuild the image using docker-compose, uncomment the 'build' section.
+    # This will build the image from the Dockerfile in the './backend' directory
+    # whenever you run 'docker-compose up --build'.
+    # For initial setup, it's often easier to build manually first.
+    # build:
+    #   context: ./backend # Path to your backend directory containing the Dockerfile
+    #   dockerfile: Dockerfile
+
