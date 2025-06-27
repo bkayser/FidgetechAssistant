@@ -33,7 +33,7 @@ const vertexAI = new VertexAI({ project: projectId, location: location });
 
 // Example: Get a generative model instance
 const model = 'gemini-1.5-flash'; // Or 'gemini-pro', 'gemini-1.0-pro'
-const generativeModel = vertexAI.get  GenerativeModel({
+const generativeModel = vertexAI.getGenerativeModel({
   model: model,
   // Optional: Set up generation configuration
   generationConfig: {
@@ -75,7 +75,7 @@ async function initializeDocumentKnowledgeBase() {
 
         // --- STEP 3: Generate Embeddings for Chunks ---
         const embeddingModel = vertexAI.getGenerativeModel({
-            model: 'text-embedding-004', // Or 'text-embedding-gecko@001'
+          model: 'text-embedding-004', // Or 'text-embedding-gecko@001'
         });
 
         for (const chunk of chunks) {
@@ -101,11 +101,10 @@ async function initializeDocumentKnowledgeBase() {
   } catch (err) {
     console.error('Failed to initialize document knowledge base:', err);
     console.warn('Ensure your GCP_BUCKET_NAME is correct and your service account has Storage Object Viewer role.');
+    // Re-throw the error after logging so the calling function can also handle it
+    throw err;
   }
 }
-
-// Call the initialization function when the server starts
-initializeDocumentKnowledgeBase();
 
 
 // --- Helper function for Cosine Similarity (simplified for demo) ---
@@ -153,7 +152,7 @@ app.post('/ask', async (req, res) => {
   try {
     // --- STEP 4: Generate Embedding for User Query ---
     const embeddingModel = vertexAI.getGenerativeModel({
-        model: 'text-embedding-004',
+      model: 'text-embedding-004',
     });
     const queryEmbedRequest = {
       content: {
@@ -172,9 +171,9 @@ app.post('/ask', async (req, res) => {
     // Sort by score in descending order and get top K (e.g., top 3)
     const topK = 3;
     const relevantChunksInfo = similarities
-      .sort((a, b) => b.score - a.score)
-      .slice(0, topK)
-      .filter(item => item.score > 0.6); // Filter out low-similarity chunks
+        .sort((a, b) => b.score - a.score)
+        .slice(0, topK)
+        .filter(item => item.score > 0.6); // Filter out low-similarity chunks
 
     const retrievedContexts = relevantChunksInfo.map(info => documentChunks[info.index].text);
     const retrievedSources = relevantChunksInfo.map(info => documentChunks[info.index].source);
@@ -213,7 +212,18 @@ app.post('/ask', async (req, res) => {
 
 
 // Start the server
-app.listen(port, () => {
-  console.log(`Fidgetech AI Backend listening at http://localhost:${port}`);
-  console.log('Remember to set GOOGLE_APPLICATION_CREDENTIALS for local GCP access.');
-});
+// Await the knowledge base initialization before starting the server
+async function startServer() {
+  try {
+    await initializeDocumentKnowledgeBase(); // Ensure initialization completes
+    app.listen(port, () => {
+      console.log(`Fidgetech AI Backend listening at http://localhost:${port}`);
+      console.log('Remember to set GOOGLE_APPLICATION_CREDENTIALS for local GCP access.');
+    });
+  } catch (startupError) {
+    console.error('Server failed to start due to initialization error:', startupError);
+    process.exit(1); // Exit if initialization fails
+  }
+}
+
+startServer(); // Call the async function to start the server
