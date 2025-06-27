@@ -8,3 +8,4 @@
 node_modules
 /fa-frontend/.react-router
 /.idea/vcs.xml
+/fa-frontend/build

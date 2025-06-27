@@ -1,12 +1,76 @@
-# Use version '3.8' for modern features and compatibility
-version: '3.8'
+# This is a Docker Compose file that defines two services: frontend and backend.
+# It is designed to run a web application with a React/Vite/Next.js frontend and a Node.js backend.
 
 services:
+
+  frontend:
+    # 'container_name' gives your container a predictable name, making it easier to
+    # find and manage in Docker Desktop or the command line.
+    container_name: frontend-app
+    # 'image' specifies the Docker image to use for this service.
+    image: us-central1-docker.pkg.dev/fidgetech/fidgetech-images/whk-frontend:latest
+
+    # The 'build' instruction tells Docker Compose to build an image from a Dockerfile.
+    build:
+      # 'context' specifies the path to the directory containing the Dockerfile and source code.
+      # The '.' indicates that the context is the current directory where this docker-compose.yml file is located.
+      # This assumes your project structure is like:
+      # /project-root
+      #   - docker-compose.yml
+      #   - /fa-frontend
+      #     - Dockerfile
+      #     - package.json
+      #     - ... your app files
+      context: ./fa-frontend
+      # 'dockerfile' specifies the name of the Dockerfile.
+      # This is useful if your Dockerfile has a non-standard name, like 'Dockerfile.dev'.
+      dockerfile: Dockerfile
+    # 'platform' specifies the architecture for the image.
+    # This is important if you're running on a specific architecture, like ARM or AMD64.
+    # If you are building an image just for local OSX docker containers, you can use the default platform
+    # by setting DOCKER_PLATFORM to linux/arm.
+    platform: ${DOCKER_PLATFORM:-linux/amd64} # Uncomment this line if you want to use an environment variable for platform
+
+    # 'ports' maps a port on the host machine to a port inside the container.
+    # The format is "HOST_PORT:CONTAINER_PORT".
+    # This example maps port 3000 on your local machine to port 3000 inside the container,
+    # which is the default for many React/Vite/Next.js development servers.
+    ports:
+      - "3000:3000"
+
+    # 'volumes' create a link between a directory on the host machine and a directory inside the container.
+    # This is essential for development, as it allows changes you make to your code locally
+    # to be immediately reflected inside the running container without rebuilding the image.
+    volumes:
+      # This line mounts the './frontend' directory from your host machine
+      # to the '/app' directory inside the container.
+      # Replace '/app' with the WORKDIR specified in your frontend's Dockerfile.
+      - ./fa-frontend:/app
+
+      # By adding a second entry for 'node_modules', we create an anonymous volume
+      # for just that directory inside the container. This prevents the local 'node_modules'
+      # (which might be built for a different OS, like macOS or Windows) from overwriting
+      # the 'node_modules' inside the Linux-based container that was installed during the image build.
+      # This is a crucial best practice for Node.js development with Docker.
+      - /app/node_modules
+    # 'depends_on' specifies that this service should start after the backend service is ready.
+    depends_on:
+      - backend
+
+    # 'environment' variables can be passed directly into the container.
+    # This is useful for variables that change between environments (dev, prod).
+    # For example, to ensure a React development server works correctly with Docker's networking.
+    environment:
+      # For Create React App, this helps enable Fast Refresh when running in a container.
+      - WDS_SOCKET_PORT=0
+      # For Vite, this ensures the dev server is accessible from outside the container.
+      - VITE_SERVER_HOST=true
+
   backend:
-    # Use the name of the Docker image you built for your Node.js backend
-    # Make sure you've built this image first using:
-    # docker build -t fa-backend ./backend
-    image: fa-backend
+
+    container_name: backend-app
+
+    image: us-central1-docker.pkg.dev/fidgetech/fidgetech-images/whk-backend:latest
 
     # Map port 8080 from the container to port 8080 on your host machine
     ports:
@@ -37,13 +101,10 @@ services:
       #
       # The ':ro' at the end means the mounted file will be read-only inside the container,
       # which is a good security practice.
-      - "fa-backend/gcs-account.json:/app/gcp-key.json:ro"
+      - "./fa-backend/gcs-account.json:/app/gcp-key.json:ro"
 
-    # If you want to rebuild the image using docker-compose, uncomment the 'build' section.
-    # This will build the image from the Dockerfile in the './backend' directory
-    # whenever you run 'docker-compose up --build'.
-    # For initial setup, it's often easier to build manually first.
+    # The 'build' instruction tells Docker Compose to build an image from a Dockerfile.
     build:
       context: ./fa-backend # Path to your backend directory containing the Dockerfile
-      dockerfile: fa-backend/Dockerfile
+      dockerfile: Dockerfile
 
