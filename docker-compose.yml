@@ -5,12 +5,12 @@ services:
   backend:
     # Use the name of the Docker image you built for your Node.js backend
     # Make sure you've built this image first using:
-    # docker build -t fidgetech-backend ./backend
-    image: fidgetech-backend
+    # docker build -t fa-backend ./backend
+    image: fa-backend
 
-    # Map port 5000 from the container to port 5000 on your host machine
+    # Map port 8080 from the container to port 8080 on your host machine
     ports:
-      - "5000:5000"
+      - "8080:8080"
 
     # Define environment variables to be passed into the container
     # These override any values specified within the Dockerfile or the server.js itself
@@ -18,8 +18,8 @@ services:
       # These variables are read by your server.js to configure GCP services
       # Make sure to replace 'your-gcp-project-id', 'us-central1', and 'fidgetech-rag-docs'
       # with your actual Google Cloud Project ID, desired region, and GCS bucket name.
-      GOOGLE_CLOUD_PROJECT_ID: "your-gcp-project-id"
-      GOOGLE_CLOUD_LOCATION: "us-central1"
+      GOOGLE_CLOUD_PROJECT_ID: "fidgetech"
+      GOOGLE_CLOUD_LOCATION: "us-west1"
       GCS_BUCKET_NAME: "fidgetech-rag-docs"
 
       # This environment variable tells Google Cloud client libraries where to find the credentials.
@@ -37,13 +37,13 @@ services:
       #
       # The ':ro' at the end means the mounted file will be read-only inside the container,
       # which is a good security practice.
-      - "/path/to/your/service-account-key.json:/app/gcp-key.json:ro"
+      - "fa-backend/gcs-account.json:/app/gcp-key.json:ro"
 
     # If you want to rebuild the image using docker-compose, uncomment the 'build' section.
     # This will build the image from the Dockerfile in the './backend' directory
     # whenever you run 'docker-compose up --build'.
     # For initial setup, it's often easier to build manually first.
-    # build:
-    #   context: ./backend # Path to your backend directory containing the Dockerfile
-    #   dockerfile: Dockerfile
+    build:
+      context: ./fa-backend # Path to your backend directory containing the Dockerfile
+      dockerfile: fa-backend/Dockerfile
 

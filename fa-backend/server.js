@@ -12,7 +12,7 @@ const { PredictionServiceClient } = require('@google-cloud/aiplatform').v1;
 const { helpers } = require('@google-cloud/aiplatform');
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 8080;
 
 // Middleware
 app.use(cors());
@@ -37,7 +37,7 @@ if (!process.env.GCS_BUCKET_NAME) {
 // --- Client for Text Generation (Gemini) ---
 const vertexAI = new VertexAI({ project: projectId, location: location });
 const generativeModel = vertexAI.getGenerativeModel({
-  model: 'gemini-1.5-flash',
+  model: 'gemini-2.0-flash-exp',
   generationConfig: {
     maxOutputTokens: 2048,
     temperature: 0.2,
@@ -72,13 +72,15 @@ async function embedText(text) {
   try {
     const [response] = await predictionServiceClient.predict(request);
 
-    // *** FIX: The response structure is simpler than previously assumed. ***
-    // We need to safely check the path to the embedding values.
-    const prediction = response.predictions && response.predictions[0];
-    if (prediction && prediction.embedding && prediction.embedding.values) {
-      return prediction.embedding.values;
+    // *** FIX: Navigating the deeply nested structure provided in the error log. ***
+    // Use optional chaining (?.) for safety to prevent 'cannot read properties of undefined' errors.
+    const valuesList = response.predictions?.[0]?.structValue?.fields?.embeddings?.structValue?.fields?.values?.listValue?.values;
+
+    if (valuesList) {
+      // The result is a list of objects like { numberValue: ... }, so we map to get the numbers.
+      return valuesList.map(v => v.numberValue);
     } else {
-      // Log an error if the structure is not what we expect.
+      // Log an error if the structure is not what we expect, including the full response for debugging.
       console.error(`Unexpected embedding response structure for chunk starting with "${text.substring(0,50)}...":`);
       console.error('Full response object:', JSON.stringify(response, null, 2));
       return null;
@@ -118,6 +120,8 @@ async function initializeDocumentKnowledgeBase() {
         console.log(`Split ${file.name} into ${chunks.length} chunks.`);
 
         for (const chunk of chunks) {
+          // print the first 50 characters of the chunk for debugging
+            console.log(`Processing chunk: "${chunk.substring(0, 50)}..."`);
           const embedding = await embedText(chunk);
           if (embedding) {
             documentChunks.push({ text: chunk, source: file.name });
@@ -186,7 +190,8 @@ app.post('/ask', async (req, res) => {
     const retrievedContexts = relevantChunksInfo.map(info => documentChunks[info.index].text);
     const retrievedSources = [...new Set(relevantChunksInfo.map(info => documentChunks[info.index].source))];
 
-    const prompt = `You are an expert technical assistant for Fidgetech. Use the following retrieved information to answer the user's question. If the information does not contain the answer, state that you cannot find the answer in the provided documents. Be concise and helpful.\n\nRetrieved Information:\n${retrievedContexts.length > 0 ? retrievedContexts.map(chunk => `- ${chunk}`).join('\n') : 'No relevant information found.'}\n\nUser's Question: ${userQuery}`;
+    const prompt = `The user is a parent of a soccer player and you are an expert on the league policies and rules.  Use the following retrieved information to answer the user's question.  If the information does not contain the answer, state that the Soccer5 league rules do not address the issue and the user should instead consult the rules of soccer found at footballrules.com. Be concise and helpful.\n\nRetrieved Information:\n${retrievedContexts.length > 0 ? retrievedContexts.map(chunk => `- ${chunk}`).join('\n') : 'No relevant information found.'}\n\nUser's Question: ${userQuery}`;
+                //`You are an expert technical assistant for Fidgetech. Use the following retrieved information to answer the user's question. If the information does not contain the answer, state that you cannot find the answer in the provided documents. Be concise and helpful.\n\nRetrieved Information:\n${retrievedContexts.length > 0 ? retrievedContexts.map(chunk => `- ${chunk}`).join('\n') : 'No relevant information found.'}\n\nUser's Question: ${userQuery}`;
 
     console.log("Sending prompt to LLM...");
     const chat = generativeModel.startChat({});

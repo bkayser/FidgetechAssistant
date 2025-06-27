@@ -1,6 +1,3 @@
-Here is a `README.md` file introducing the application and providing instructions to run it.
-
-```markdown
 # Fidgetech AI Q&A Bot
 
 This is a template application for the Fidgetech AI Training Program coding exercise. The app is a React-based Q&A bot that allows users to ask questions about technical documentation. It uses Retrieval Augmented Generation (RAG) to provide answers, retrieving relevant document snippets and source titles from a backend API.
@@ -16,7 +13,7 @@ This is a template application for the Fidgetech AI Training Program coding exer
 
 - [Node.js](https://nodejs.org/) (v16 or higher recommended)
 - [npm](https://www.npmjs.com/) (comes with Node.js)
-- Backend API running at `http://localhost:5000` (see your exercise instructions for backend setup)
+- Backend API running at `http://localhost:8080` (see your exercise instructions for backend setup)
 
 ## Getting Started
 
@@ -46,10 +43,10 @@ This is a template application for the Fidgetech AI Training Program coding exer
 
 ## Notes
 
-- Make sure the backend API is running and accessible at `http://localhost:5000`.
+- Make sure the backend API is running and accessible at `http://localhost:8080`.
 - This template is intended for educational purposes as part of the Fidgetech AI Training Program.
 
 ## License
 
 This project is for educational use only.
-```
+

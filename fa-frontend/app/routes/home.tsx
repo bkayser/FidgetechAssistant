@@ -23,8 +23,8 @@ function Home() {
     const [error, setError] = useState<string | null>(null);
 
     // You would typically get this from an environment variable or config
-    // For local development, this assumes the backend is running on localhost:5000
-    const BACKEND_API_URL: string = 'http://localhost:5000'; // Replace with deployed URL in production/Cloud Run
+    // For local development, this assumes the backend is running on localhost:8080
+    const BACKEND_API_URL: string = 'http://localhost:8080'; // Replace with deployed URL in production/Cloud Run
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
         e.preventDefault();

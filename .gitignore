@@ -5,3 +5,6 @@
 /.react-router/
 /build/
 /fa-backend/gcs-account.json
+node_modules
+/fa-frontend/.react-router
+/.idea/vcs.xml
