@@ -83,7 +83,7 @@ services:
       # Make sure to replace 'your-gcp-project-id', 'us-central1', and 'fidgetech-rag-docs'
       # with your actual Google Cloud Project ID, desired region, and GCS bucket name.
       GOOGLE_CLOUD_PROJECT_ID: "fidgetech"
-      GOOGLE_CLOUD_LOCATION: "us-west1"
+      GOOGLE_CLOUD_LOCATION: "us-central1"
       GCS_BUCKET_NAME: "fidgetech-rag-docs"
 
       # This environment variable tells Google Cloud client libraries where to find the credentials.

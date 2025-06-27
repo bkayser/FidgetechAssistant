@@ -13,10 +13,11 @@ RUN npm run build
 FROM nginx:alpine
 
 # Copy built assets from builder
-COPY --from=builder /app/build/client /usr/share/nginx/html
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy custom nginx config if needed (optional)
-# COPY nginx.conf /etc/nginx/nginx.conf
+# Copy custom nginx config so the app runs on port 3000
+# and serves the built files correctly.
+COPY nginx-frontend.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 3000
 
