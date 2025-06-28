@@ -18,7 +18,6 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # Copy custom nginx config so the app runs on port 3000
 # and serves the built files correctly.
 COPY nginx-frontend.conf /etc/nginx/conf.d/default.conf
-
+COPY api_url_config.sh /docker-entrypoint.d/90-api-url-config.sh
 EXPOSE 3000
-
 CMD ["nginx", "-g", "daemon off;"]

@@ -109,20 +109,10 @@ To deploy the application using Docker Compose, follow these steps:
    This will start the backend and frontend. The application will be accessible at [http://localhost:3000](http://localhost:3000).
    
 ## Google Cloud Deployment
-To deploy the application to Google Cloud, you can use the provided Docker Compose setup. Ensure you have Docker Desktop running and follow these steps:
-1. **Build the Docker Images**
-   ```bash
-   docker compose build
-   ```
-2. **Push the Images to Google Container Registry**
-   ```bash
-   docker compose push
-   ```
-   Ensure you are authenticated with Google Cloud and the registry before pushing the images.
-3. **Deploy to Google Cloud**
-   When you have everything working and want to deploy to the cloud to show your instructor, classmates, friends, or
-   even complete strangers, you can deploy the backend and frontend services to Google Cloud Run and serve them
-   on the internet.  Follow [these instructions](README-gcs.md) to deploy the application to Google Cloud.
+
+When you have everything working and want to deploy to the cloud to show your instructor, classmates, friends, or
+even complete strangers, you can deploy the backend and frontend services to Google Cloud Run and serve them
+on the internet.  Follow [these instructions](README-gcs.md) to deploy the application to Google Cloud.
 
 ## Notes
 - All code is written in TypeScript for both the backend and frontend.  If you are new to TypeScript, you can find many resources online to help you get started.

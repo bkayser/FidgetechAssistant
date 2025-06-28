@@ -10,11 +10,9 @@ This assumes you have successfully deployed your containers to Docker Desktop an
 Before executing these instructions, decide on a unique identifier for your images.
 Since we are all deploying to the same project, you need a unique identifier to keep your server components 
 distinct.  As a convention, we will use initials to identify your images and your services so that you won't overwrite anyone else's images.
-Use at least three letters, or any other short unique identifier that you prefer.  This will be used in the image URLs, secret identifier, and service names.
+Use at least three letters, or any other short unique identifier that you prefer.  This will be used in the image URLs, secrets manager, and service names.
  
 In the instructions below, replace `IDENTIFIER` with your unique identifier.  This is important to avoid overwriting the class images!
-It would be a good idea to copy the commands to a text editor and replace `IDENTIFIER` with your unique identifier before 
-executing the commands, and that save the file so you can re-execute them in the future.
  
 1. **Authenticate with Google Cloud**
    Authenticate and set your local default project.
@@ -27,8 +25,7 @@ executing the commands, and that save the file so you can re-execute them in the
    ```
 1. **Declare your Image URLs**   
    In the `docker-compose.yml` file, ensure you have the correct image URLs for your backend and frontend services. 
-   Replace "whk" in the existing image URLS with a unique identifier. 
-
+   
    Here's an example of how your `docker-compose.yml` file should look:
  
    ```yaml
@@ -50,7 +47,7 @@ executing the commands, and that save the file so you can re-execute them in the
     ```
     Add the key file as a secret version:
     ```bash
-    gcloud secrets versions add gcp-IDENTIFIER-service-account-key --data-file=gcs-account.json
+    gcloud secrets versions add gcp-IDENTIFIER-service-account-key --data-file=fa-backend/gcs-account.json
     ```
 1. **Build the Docker Images**
    ```bash
@@ -72,7 +69,7 @@ executing the commands, and that save the file so you can re-execute them in the
       --region=us-central1 \
       --port=8080 \
       --allow-unauthenticated \
-      --set-env-vars="SPRING_PROFILES_ACTIVE=prod" \
+      --set-env-vars="GOOGLE_CLOUD_PROJECT_ID=fidgetech,GOOGLE_CLOUD_LOCATION=us-central1,GCS_BUCKET_NAME=fidgetech-rag-docs" \
       --update-secrets="GCS_ACCOUNT_KEY=gcp-IDENTIFIER-service-account-key:latest"
     ```
     Make a note of the URL that is printed after the deployment completes.  This is the URL you will use to access the backend API

@@ -10,3 +10,4 @@ node_modules
 /.idea/vcs.xml
 /fa-frontend/build
 /fa-frontend/dist
+/my-commands.md

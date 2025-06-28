@@ -65,6 +65,9 @@ services:
       - WDS_SOCKET_PORT=0
       # For Vite, this ensures the dev server is accessible from outside the container.
       - VITE_SERVER_HOST=true
+      # Specify the back end URL for the frontend to connect to.  This is used to substitute the
+      #__BACKEND_API_URL__ with http://localhost:8080 in env.js.
+      - BACKEND_API_URL=http://localhost:8080
 
   backend:
 
@@ -75,6 +78,8 @@ services:
     # Map port 8080 from the container to port 8080 on your host machine
     ports:
       - "8080:8080"
+
+    platform: ${DOCKER_PLATFORM:-linux/amd64} # Uncomment this line if you want to use an environment variable for platform
 
     # Define environment variables to be passed into the container
     # These override any values specified within the Dockerfile or the server.js itself
